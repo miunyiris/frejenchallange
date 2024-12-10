@@ -1,9 +1,10 @@
 const { Sequelize } = require('sequelize');
+require('dotenv').config();
 
 // Configuração de conexão com o banco de dados
-const sequelize = new Sequelize('tickets', 'user', 'user', {
-    host: 'localhost',   // ou o host do seu banco de dados, como 'localhost'
-    dialect: 'mysql',    // ou 'postgres', 'sqlite', etc.
+const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
+    host: process.env.DB_HOST,
+    dialect: 'mysql',  // ou 'postgres', 'sqlite', etc.
 });
 
 async function connectDatabase() {
