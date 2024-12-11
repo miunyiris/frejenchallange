@@ -167,6 +167,10 @@ app.get('/api/tickets/:ticketId', async (req, res) => {
             attributes: ['title', 'description', 'createdAt', 'updatedAt', 'created_by', 'updated_by', 'id_department', 'id_state', 'observacoes'],
         });
 
+        // const ticket = await Tickets.findByPk(ticketId, {
+        //     attributes: ['title', 'description', 'createdAt', 'updatedAt', 'created_by', 'updated_by', 'id_department', 'id_state', 'observacoes'],
+        // });
+
         if (tickets.length === 0) {
             return res.status(404).json({ error: 'Ticket não encontrado' });
         }
@@ -195,9 +199,22 @@ app.get('/api/tickets/:ticketId', async (req, res) => {
 });
 
 app.get('/api/tickets', async (req, res) => {
-    const { status, search,created_id, department_id } = req.query;
+    const { status, search,created_id, department_id,pagenumber,pagesize } = req.query;
+    console.log(req.query);
+    const pageNumber =  Number(pagenumber);
+    const pageSize = Number(pagesize);
+    let hasMore= true;
 
     let whereConditions = {};
+
+    
+    if (!pagenumber) {
+        return res.status(400).json({ error: 'Parâmetro de estado é necessário.' });
+    }
+
+    if (!pagesize) {
+        return res.status(400).json({ error: 'Parâmetro de estado é necessário.' });
+    }
 
     if (!status) {
         return res.status(400).json({ error: 'Parâmetro de estado é necessário.' });
@@ -214,30 +231,64 @@ app.get('/api/tickets', async (req, res) => {
     whereConditions.id_state = statusArray;
 
 
+// Construção das condições de pesquisa
+let andConditions = [];  // Para armazenar todas as condições agrupadas com Op.and
+
+// Se created_id ou department_id forem fornecidos, adicionamos essas condições
+if (created_id || department_id) {
+    let orConditions = [];  // Para as condições "OR" relacionadas a created_id e department_id
+    
     if (created_id) {
-        whereConditions.created_by = created_id;
+        orConditions.push({ created_by: created_id });
     }
 
     if (department_id) {
-        whereConditions.id_department = department_id;
+        orConditions.push({ id_department: department_id });
     }
 
-    if (search) {
-        whereConditions = {
-            ...whereConditions,
-            [Op.or]: [
-                { observacoes: { [Op.like]: `%${search}%` } },
-                { title: { [Op.like]: `%${search}%` } },
-                { description: { [Op.like]: `%${search}%` } }
-            ]
-        };
+    if (orConditions.length > 0) {
+        andConditions.push({ [Op.or]: orConditions });
     }
+}
+
+// Se search for fornecido e não estiver vazio, adicionamos as condições de pesquisa
+if (search && search.trim() !== '') {
+    let orSearchConditions = [
+        { observacoes: { [Op.like]: `%${search.toLocaleLowerCase()}%` } },
+        { title: { [Op.like]: `%${search.toLocaleLowerCase()}%` } },
+        { description: { [Op.like]: `%${search.toLocaleLowerCase()}%` } }
+    ];
+
+    andConditions.push({ [Op.or]: orSearchConditions });
+}
+
+// Verifica se temos condições para aplicar no whereConditions
+if (andConditions.length > 0) {
+    whereConditions[Op.and] = andConditions;
+}
         
+    console.log(whereConditions);
+
     try {
         const tickets = await Tickets.findAll({
             where: whereConditions,
-            attributes: ['title', 'createdAt', 'updatedAt', 'id_department', 'id_state'],
+            //attributes: ['title', 'createdAt', 'updatedAt', 'id_department', 'id_state'],
+            attributes: ['id','title', 'createdAt', 'updatedAt', 'id_state','created_by','updated_by'],
+            limit: pageSize,
+            offset: (pageNumber - 1) * pageSize,
+            order: [
+                ['updatedAt', 'DESC'],  // Ordena pela coluna 'updatedAt' em ordem decrescente
+            ],
         });
+
+    const totalCount = await Tickets.count();
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    if(pageNumber >= totalPages)
+    {
+        hasMore = false;
+    }
 
         if (tickets.length === 0) {
             return res.status(404).json({ message: 'Nenhum ticket encontrado para os estados fornecidos.' });
@@ -245,6 +296,7 @@ app.get('/api/tickets', async (req, res) => {
 
         const formattedTickets = tickets.map(ticket => {
             return {
+                id: ticket.id,
                 title: ticket.title,
                 id_department:ticket.id_department,
                 id_state: ticket.id_state,
@@ -253,7 +305,12 @@ app.get('/api/tickets', async (req, res) => {
             };
         });
 
-        res.status(200).json(formattedTickets);
+        const response = {
+            "tickets":formattedTickets,
+            "hasMore":hasMore
+        }
+
+        res.status(200).json(response);
     } catch (error) {
         console.error('Erro ao buscar tickets:', error);
         res.status(500).json({ error: 'Erro ao buscar tickets', details: error.message });
@@ -264,12 +321,58 @@ app.get('/api/tickets', async (req, res) => {
 app.get('/api/departments', async (req, res) => {
     try {
         const department = await Department.findAll({
-            attributes: ['title'],
+            attributes: ['id','title'],
         });
 
-        const titles = department.map(d => d.title);
+        //const titles = department.map(d => d.title);
 
-        res.status(200).json(titles);
+        res.status(200).json(department);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao buscar ticket', details: error.message });
+    }
+});
+
+app.get('/api/asd', async (req, res) => {
+    const { pagenumber,pagesize } = req.query;
+    const pageNumber =  Number(pagenumber);
+    const pageSize = Number(pagesize);
+    let hasMore= true;
+    try {
+        const department = await Department.findAll({
+            attributes: ['id','title'],
+            limit: pageSize,
+            offset: (pageNumber - 1) * pageSize,
+        });
+
+        const totalCount = await Department.count();
+
+        const totalPages = Math.ceil(totalCount / pageSize);
+
+        if(pageNumber >= totalPages)
+        {
+            hasMore = false;
+        }
+
+        //const titles = department.map(d => d.title);
+
+        // let object = {
+        //     "tickets": [
+        //       { "id": 1 + page, "title": "teste12", "description": "teste12" },
+        //       { "id": 2 + page, "title": "teste21", "description": "teste12"  },
+        //       { "id": 3 + page, "title": "teste123", "description": "teste12"  },
+        //       { "id": 4 + page, "title": "teste321", "description": "teste12"  },
+        //       { "id": 5 + page, "title": "teste124", "description": "teste12"  },
+        //       { "id": 6 + page, "title": "teste421", "description": "teste12"  },
+        //       { "id": 7 + page, "title": "teste125", "description": "teste12"  },
+        //       { "id": 8 + page, "title": "teste521", "description": "teste12"  },
+        //       { "id": 9 + page, "title": "teste521", "description": "teste12"  },
+        //       { "id": 10 + page, "title": "teste521", "description": "teste12"  },
+        //     ],
+        //     "hasMore": true
+        //   };
+
+        res.status(200).json(hasMore);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Erro ao buscar ticket', details: error.message });
@@ -278,7 +381,7 @@ app.get('/api/departments', async (req, res) => {
 
 connectDatabase().then(async () => {
     await sequelize.sync();
-    app.listen(5000, () => {
-        console.log('Server running on port 5000');
+    app.listen(1880, () => {
+        console.log('Server running on port 1880');
     });
 });
