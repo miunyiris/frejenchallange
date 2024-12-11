@@ -100,6 +100,7 @@ app.get('/api/alltickets', async (req, res) => {
 
 app.post('/api/tickets', async (req, res) => {
     const { title, description, created_by, id_department } = req.body;
+    console.log(req.body);
     try {
         const newUser = await Tickets.create({
             title: title,
