@@ -27,20 +27,18 @@ const User = sequelize.define('users', {
     id_department: {
         type: DataTypes.INTEGER,
         references: {
-            model: Department, // A referência para a tabela 'Department'
-            key: 'id', // Chave primária da tabela Department
+            model: Department,
+            key: 'id',
         },
-        allowNull: false, // Opcional, caso o departamento seja obrigatório para o usuário
+        allowNull: false,
     },
     admin: {
         type: DataTypes.INTEGER,
-        defaultValue: 0, // Usuário não é admin por padrão
+        defaultValue: 0,
     }
 });
 
-// Relacionamento entre as tabelas
 Department.hasMany(User, { foreignKey: 'id_department' });
 User.belongsTo(Department, { foreignKey: 'id_department' });
 
-// Exporta o modelo para ser utilizado em outras partes do código
 module.exports = User;

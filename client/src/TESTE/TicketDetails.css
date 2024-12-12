@@ -1,0 +1,25 @@
+.ticket-details {
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 500px;
+    background-color: #f9f9f9;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+  }
+  
+  .ticket-details h2 {
+    font-size: 1.5rem;
+    color: #007BFF;
+    margin-bottom: 10px;
+  }
+  
+  .ticket-details p {
+    margin: 8px 0;
+    font-size: 1rem;
+    color: #333;
+  }
+  
+  .ticket-details p strong {
+    color: #555;
+  }

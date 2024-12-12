@@ -1,65 +1,68 @@
 const express = require('express');
 const app = express();
-const { sequelize, connectDatabase } = require('./db');  // Importando o sequelize aqui também
+const { sequelize, connectDatabase } = require('./db');
 const User = require('./models/User');
 const Tickets = require('./models/Tickets');
-const { QueryTypes,Op } = require('sequelize');
+const { Op } = require('sequelize');
 const Department = require('./models/Departments');
-const State = require('./models/States');
 
-// Middleware para aceitar JSON
 app.use(express.json());
 
-// Middleware para aceitar dados codificados por URL
 app.use(express.urlencoded({ extended: true }));
 
 function formatDate(date) {
     return `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
 }
 
-// Rota para testar a conexão e listar todos os usuários
-app.get('/api/users', async (req, res) => {
+function formatTicket(newTicket) {
+    return {
+        id: newTicket.id,
+        title: newTicket.title,
+        department: newTicket.Department.title,
+        id_state: newTicket.id_state,
+        createdAt: formatDate(new Date(newTicket.createdAt)),
+        updatedAt: formatDate(new Date(newTicket.updatedAt)),
+        observacoes: newTicket.observacoes,
+        createdByName: newTicket.createdBy.name,
+        updatedByName: newTicket.updatedBy.name,
+    };
+}
+
+app.post('/api/authenticate', async (req, res) => {
+    const { email, password } = req.body;
+
     try {
-        const users = await sequelize.query(`
-            SELECT 
-                u.id, 
-                u.name, 
-                u.email, 
-                u.password, 
-                u.admin, 
-                d.title AS department_title
-            FROM users u
-            INNER JOIN departements d ON u.id_department = d.id 
-        `, {
-            type: QueryTypes.SELECT, //tirar o e de departments
+        if (!email || !password) {
+            return res.status(400).json({ error: 'Email e senha são obrigatórios' });
+        }
+
+        const user = await User.findOne({
+            where: { email, password },
+            attributes: ['id', 'name', 'admin'],
+            include: [{
+                model: Department,
+                attributes: ['id','title'],
+            }],
         });
 
-        res.status(200).json(users);  // Retorna os dados no formato esperado
+        if (!user) {
+            return res.status(404).json({ error: 'Usuário não encontrado ou credenciais inválidas' });
+        }
+
+        const userInfo = {
+            id:user.id,
+            name: user.name,
+            id_department: user.Department.id,
+            department:user.Department.title,
+            admin: user.admin,
+        };
+
+        res.status(200).json(userInfo);
     } catch (error) {
-        console.error(error);  // Imprime o erro no console para diagnóstico
-        res.status(500).json({ error: 'Erro ao buscar usuários', details: error.message });
+        console.error(error);
+        res.status(500).json({ error: 'Erro ao autenticar usuário', details: error.message });
     }
 });
-
-app.post('/api/users', async (req, res) => {
-    const admin = 0;
-    const { username, email, password, id_department } = req.body;
-    try {
-        const newUser = await User.create({
-            name: username,
-            email: email,
-            password: password,
-            id_department: id_department,
-            admin: admin
-        });
-
-        res.status(201).json({ message: 'Usuário criado com sucesso!', userId: newUser.id });
-    } catch (error) {
-        console.error('Erro ao criar usuário:', error);
-        res.status(500).json({ error: 'Erro ao criar usuário', details: error.message });
-    }
-});
-
 
 app.put('/api/users/:id', async (req, res) => {
     const { id } = req.params;
@@ -87,121 +90,8 @@ app.put('/api/users/:id', async (req, res) => {
     }
 });
 
-app.get('/api/alltickets', async (req, res) => {
-    try {
-        const tickets = await Tickets.findAll();
-
-        res.status(200).json(tickets);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Erro ao buscar usuários', details: error.message });
-    }
-});//ja nao é necessario
-
-app.post('/api/tickets', async (req, res) => {
-    const { title, description, created_by, id_department } = req.body;
-    console.log(req.body);
-    try {
-        const newUser = await Tickets.create({
-            title: title,
-            description: description,
-            created_by: created_by,
-            updated_by: created_by,
-            id_department: id_department,
-        });
-
-        res.status(201).json({ message: 'Usuário criado com sucesso!', userId: newUser.id });
-    } catch (error) {
-        console.error('Erro ao criar usuário:', error);
-        res.status(500).json({ error: 'Erro ao criar usuário', details: error.message });
-    }
-});
-
-// app.get('/api/tickets', async (req, res) => {
-//     const { created_id, department_id } = req.query;
-//     try {
-//         const tickets = await Tickets.findAll({
-//             where: {
-//                 created_by: created_id, 
-//                 id_department: department_id, 
-//             }
-//         });
-
-//         res.json(tickets);
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: 'Erro ao buscar usuários', details: error.message });
-//     }
-// });
-
-app.put('/api/tickets/:ticketId', async (req, res) => {
-    const { ticketId } = req.params;
-    const { userId, idState, observations} = req.body;
-
-    try {
-        const ticket = await Tickets.findByPk(ticketId);
-
-        if (!ticket) {
-            return res.status(404).json({ error: 'Ticket not found!' });
-        }
-
-        await ticket.update({
-            updated_by: userId,
-            id_state: idState,
-            observacoes: observations,
-        });
-
-        res.status(200).json({ message: 'Usuário atualizado com sucesso!', Ticket: ticket });
-    } catch (error) {
-        console.error('Erro ao atualizar usuário:', error);
-        res.status(500).json({ error: 'Erro ao atualizar usuário', details: error.message });
-    }
-});
-
-app.get('/api/tickets/:ticketId', async (req, res) => {
-    const { ticketId } = req.params;
-    try {
-        const tickets = await Tickets.findAll({
-            where: {
-                id: ticketId,
-            },
-            attributes: ['title', 'description', 'createdAt', 'updatedAt', 'created_by', 'updated_by', 'id_department', 'id_state', 'observacoes'],
-        });
-
-        // const ticket = await Tickets.findByPk(ticketId, {
-        //     attributes: ['title', 'description', 'createdAt', 'updatedAt', 'created_by', 'updated_by', 'id_department', 'id_state', 'observacoes'],
-        // });
-
-        if (tickets.length === 0) {
-            return res.status(404).json({ error: 'Ticket não encontrado' });
-        }
-
-        const ticket = tickets[0]; // Acessando o primeiro item do array retornado
-
-        const formattedTicket = (ticket) => {
-            return {
-                title: ticket.title,
-                id_department: ticket.id_department,
-                id_state: ticket.id_state,
-                createdAt: formatDate(new Date(ticket.createdAt)),
-                updatedAt: formatDate(new Date(ticket.updatedAt)),
-                description: ticket.description,
-                created_by: ticket.created_by,
-                updated_by: ticket.updated_by,
-                observacoes: ticket.observacoes
-            };
-        };
-
-        res.status(200).json(formattedTicket(ticket));
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Erro ao buscar ticket', details: error.message });
-    }
-});
-
 app.get('/api/tickets', async (req, res) => {
     const { status, search,created_id, department_id,pagenumber,pagesize } = req.query;
-    console.log(req.query);
     const pageNumber =  Number(pagenumber);
     const pageSize = Number(pagesize);
     let hasMore= true;
@@ -231,13 +121,9 @@ app.get('/api/tickets', async (req, res) => {
 
     whereConditions.id_state = statusArray;
 
-
-// Construção das condições de pesquisa
-let andConditions = [];  // Para armazenar todas as condições agrupadas com Op.and
-
-// Se created_id ou department_id forem fornecidos, adicionamos essas condições
+let andConditions = [];  
 if (created_id || department_id) {
-    let orConditions = [];  // Para as condições "OR" relacionadas a created_id e department_id
+    let orConditions = [];
     
     if (created_id) {
         orConditions.push({ created_by: created_id });
@@ -252,7 +138,6 @@ if (created_id || department_id) {
     }
 }
 
-// Se search for fornecido e não estiver vazio, adicionamos as condições de pesquisa
 if (search && search.trim() !== '') {
     let orSearchConditions = [
         { observacoes: { [Op.like]: `%${search.toLocaleLowerCase()}%` } },
@@ -263,26 +148,44 @@ if (search && search.trim() !== '') {
     andConditions.push({ [Op.or]: orSearchConditions });
 }
 
-// Verifica se temos condições para aplicar no whereConditions
 if (andConditions.length > 0) {
     whereConditions[Op.and] = andConditions;
 }
-        
-    console.log(whereConditions);
 
     try {
         const tickets = await Tickets.findAll({
             where: whereConditions,
-            //attributes: ['title', 'createdAt', 'updatedAt', 'id_department', 'id_state'],
-            attributes: ['id','title', 'createdAt', 'updatedAt', 'id_state','created_by','updated_by'],
+            attributes: ['id','title','description', 'createdAt', 'updatedAt', 'id_state','created_by','updated_by','observacoes','id_department'],
             limit: pageSize,
             offset: (pageNumber - 1) * pageSize,
             order: [
-                ['updatedAt', 'DESC'],  // Ordena pela coluna 'updatedAt' em ordem decrescente
+                ['updatedAt', 'DESC'],
+                ['id', 'ASC'] 
             ],
+            include:  [
+                {
+                    model: Department,
+                    attributes: ['title'],
+                    required: true,
+                },
+                {
+                    model: User,
+                    as: 'createdBy',
+                    attributes: ['name'],
+                    foreignKey: 'created_by',
+                },
+                {
+                    model: User,
+                    as: 'updatedBy',
+                    attributes: ['name'],
+                    foreignKey: 'updated_by',
+                }
+            ]
         });
 
-    const totalCount = await Tickets.count();
+        const totalCount = await Tickets.count({
+            where: whereConditions,
+          });
 
     const totalPages = Math.ceil(totalCount / pageSize);
 
@@ -297,12 +200,15 @@ if (andConditions.length > 0) {
 
         const formattedTickets = tickets.map(ticket => {
             return {
-                id: ticket.id,
-                title: ticket.title,
-                id_department:ticket.id_department,
-                id_state: ticket.id_state,
+                id:ticket.id,
+                title:ticket.title,
+                department:ticket.Department.title,
+                id_state:ticket.id_state,
                 createdAt: formatDate(new Date(ticket.createdAt)),
-                updateAt:formatDate(new Date(ticket.updatedAt))
+                updatedAt:formatDate(new Date(ticket.updatedAt)),
+                observacoes:ticket.observacoes,
+                createdByName:ticket.createdBy.name,
+                updatedByName:ticket.updatedBy.name,
             };
         });
 
@@ -318,6 +224,135 @@ if (andConditions.length > 0) {
     }
 });
 
+app.post('/api/tickets', async (req, res) => {
+    const { title, description, created_by, id_department } = req.body;
+    console.log(req.body);
+    try {
+        const newUser = await Tickets.create({
+            title: title,
+            description: description,
+            created_by: created_by,
+            updated_by: created_by,
+            id_department: id_department,
+        });
+
+        const newTicket = await Tickets.findByPk(newUser.id, {
+            attributes: ['id', 'title', 'description', 'createdAt', 'updatedAt', 'id_state', 'created_by', 'updated_by', 'observacoes', 'id_department'],
+            include: [
+              {
+                model: Department,
+                attributes: ['title'],
+                required: true,
+              },
+              {
+                model: User,
+                as: 'createdBy',
+                attributes: ['name'],
+                foreignKey: 'created_by',
+              },
+              {
+                model: User,
+                as: 'updatedBy',
+                attributes: ['name'],
+                foreignKey: 'updated_by',
+              }
+            ]
+          });
+
+          console.log(formatTicket(newTicket));
+
+        res.status(200).json(formatTicket(newTicket));
+
+        //res.status(201).json({ message: 'Usuário criado com sucesso!', userId: newUser.id });
+    } catch (error) {
+        console.error('Erro ao criar usuário:', error);
+        res.status(500).json({ error: 'Erro ao criar usuário', details: error.message });
+    }
+});
+
+app.put('/api/tickets/:ticketId', async (req, res) => {
+    const { ticketId } = req.params;
+    const { userId, idState, observations} = req.body;
+
+    try {
+        const ticket = await Tickets.findByPk(ticketId);
+
+        if (!ticket) {
+            return res.status(404).json({ error: 'Ticket not found!' });
+        }
+
+        await ticket.update({
+            updated_by: userId,
+            id_state: idState,
+            observacoes: observations,
+        });
+
+        const ticketUpdated = await Tickets.findByPk(ticketId, {
+            attributes: ['id', 'title', 'description', 'createdAt', 'updatedAt', 'id_state', 'created_by', 'updated_by', 'observacoes', 'id_department'],
+            include: [
+              {
+                model: Department,
+                attributes: ['title'],
+                required: true,
+              },
+              {
+                model: User,
+                as: 'createdBy',
+                attributes: ['name'],
+                foreignKey: 'created_by',
+              },
+              {
+                model: User,
+                as: 'updatedBy',
+                attributes: ['name'],
+                foreignKey: 'updated_by',
+              }
+            ]
+          });
+
+        res.status(200).json(formatTicket(ticketUpdated));
+    } catch (error) {
+        console.error('Erro ao atualizar usuário:', error);
+        res.status(500).json({ error: 'Erro ao atualizar usuário', details: error.message });
+    }
+});
+
+// app.get('/api/tickets/:ticketId', async (req, res) => {
+//     const { ticketId } = req.params;
+//     try {
+//         const tickets = await Tickets.findAll({
+//             where: {
+//                 id: ticketId,
+//             },
+//             attributes: ['title', 'description', 'createdAt', 'updatedAt', 'created_by', 'updated_by', 'id_department', 'id_state', 'observacoes'],
+//         });
+
+//         if (tickets.length === 0) {
+//             return res.status(404).json({ error: 'Ticket não encontrado' });
+//         }
+
+//         const ticket = tickets[0];
+
+//         const formattedTicket = (ticket) => {
+//             return {
+//                 title: ticket.title,
+//                 id_department: ticket.id_department,
+//                 id_state: ticket.id_state,
+//                 createdAt: formatDate(new Date(ticket.createdAt)),
+//                 updatedAt: formatDate(new Date(ticket.updatedAt)),
+//                 description: ticket.description,
+//                 created_by: ticket.created_by,
+//                 updated_by: ticket.updated_by,
+//                 observacoes: ticket.observacoes
+//             };
+//         };
+
+//         res.status(200).json(formattedTicket(ticket));
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ error: 'Erro ao buscar ticket', details: error.message });
+//     }
+// });
 
 app.get('/api/departments', async (req, res) => {
     try {
@@ -325,55 +360,7 @@ app.get('/api/departments', async (req, res) => {
             attributes: ['id','title'],
         });
 
-        //const titles = department.map(d => d.title);
-
         res.status(200).json(department);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Erro ao buscar ticket', details: error.message });
-    }
-});
-
-app.get('/api/asd', async (req, res) => {
-    const { pagenumber,pagesize } = req.query;
-    const pageNumber =  Number(pagenumber);
-    const pageSize = Number(pagesize);
-    let hasMore= true;
-    try {
-        const department = await Department.findAll({
-            attributes: ['id','title'],
-            limit: pageSize,
-            offset: (pageNumber - 1) * pageSize,
-        });
-
-        const totalCount = await Department.count();
-
-        const totalPages = Math.ceil(totalCount / pageSize);
-
-        if(pageNumber >= totalPages)
-        {
-            hasMore = false;
-        }
-
-        //const titles = department.map(d => d.title);
-
-        // let object = {
-        //     "tickets": [
-        //       { "id": 1 + page, "title": "teste12", "description": "teste12" },
-        //       { "id": 2 + page, "title": "teste21", "description": "teste12"  },
-        //       { "id": 3 + page, "title": "teste123", "description": "teste12"  },
-        //       { "id": 4 + page, "title": "teste321", "description": "teste12"  },
-        //       { "id": 5 + page, "title": "teste124", "description": "teste12"  },
-        //       { "id": 6 + page, "title": "teste421", "description": "teste12"  },
-        //       { "id": 7 + page, "title": "teste125", "description": "teste12"  },
-        //       { "id": 8 + page, "title": "teste521", "description": "teste12"  },
-        //       { "id": 9 + page, "title": "teste521", "description": "teste12"  },
-        //       { "id": 10 + page, "title": "teste521", "description": "teste12"  },
-        //     ],
-        //     "hasMore": true
-        //   };
-
-        res.status(200).json(hasMore);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Erro ao buscar ticket', details: error.message });

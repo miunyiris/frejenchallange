@@ -1,0 +1,25 @@
+INSERT INTO `tickets`.`departments` (`title`) VALUES ('IT');
+INSERT INTO `tickets`.`departments` (`title`) VALUES ('Recursos Humanos');
+INSERT INTO `tickets`.`departments` (`title`) VALUES ('Marketing');
+INSERT INTO `tickets`.`departments` (`title`) VALUES ('Contabilidade');
+INSERT INTO `tickets`.`departments` (`title`) VALUES ('Vendas');
+
+INSERT INTO `tickets`.`states` (`title`) VALUES ('Pendente');
+INSERT INTO `tickets`.`states` (`title`) VALUES ('Recusado');
+INSERT INTO `tickets`.`states` (`title`) VALUES ('Em tratamento');
+INSERT INTO `tickets`.`states` (`title`) VALUES ('Finalizado');
+
+
+INSERT INTO `tickets`.`users` (`name`, `email`, `password`, `id_department`, `admin`) VALUES ('admin', 'admin@gmail.com', 'adminteste1', '1', '1');
+INSERT INTO `tickets`.`users` (`name`, `email`, `password`, `id_department`, `admin`) VALUES ('Andreia', 'andreia@gmail.com', 'andreiateste1', '2', '0');
+INSERT INTO `tickets`.`users` (`name`, `email`, `password`, `id_department`, `admin`) VALUES ('Fábio', 'fabio@gmail.com', 'fabioteste1', '1', '0');
+INSERT INTO `tickets`.`users` (`name`, `email`, `password`, `id_department`, `admin`) VALUES ('Raquel', 'raquel@gmail.com', 'raquelteste1', '1', '0');
+INSERT INTO `tickets`.`users` (`name`, `email`, `password`, `id_department`, `admin`) VALUES ('Tiago', 'tiago@gmail.com', 'tiagoteste1', '1', '0');
+INSERT INTO `tickets`.`users` (`name`, `email`, `password`, `id_department`, `admin`) VALUES ('Carolina', 'carolina@gmail.com', 'carolinateste1', '1', '0');
+INSERT INTO `tickets`.`users` (`name`, `email`, `password`, `id_department`, `admin`) VALUES ('Paulo', 'paulo@gmail.com', 'pauloteste1', '1', '0');
+INSERT INTO `tickets`.`users` (`name`, `email`, `password`, `id_department`, `admin`) VALUES ('Bruno', 'bruno@gmail.com', 'brunoteste1', '1', '0');
+
+INSERT INTO `tickets`.`tickets` (`title`, `description`, `created_by`, `updated_by`, `id_state`) VALUES ('Problema no servidor', 'Servidor está com problemas', '8', '8', '4');
+INSERT INTO `tickets`.`tickets` (`title`, `description`, `created_by`, `updated_by`, `id_state`) VALUES ('Revisão de contrato', 'Contrato do colaborador X precisa de ser revisto', '3', '2', '3');
+INSERT INTO `tickets`.`tickets` (`title`, `description`, `created_by`, `updated_by`, `id_state`, `observacoes`) VALUES ('Solicitação de férias', 'Colaborador solicitou férias para o mês de dezembro', '5', '2', '2', 'O colaborador já gozou os 22 dias de férias');
+INSERT INTO `tickets`.`tickets` (`title`, `description`, `created_by`, `updated_by`, `id_state`) VALUES ('Problema na integração com redes sociais', 'A integração com o Facebook não está funcionando corretamente', '2', '4', '1');

@@ -92,6 +92,52 @@ INSERT INTO `tickets`.`tickets` (`title`, `description`, `created_by`, `updated_
 INSERT INTO `tickets`.`tickets` (`title`, `description`, `created_by`, `updated_by`, `id_state`, `observacoes`) VALUES ('Solicitação de férias', 'Colaborador solicitou férias para o mês de dezembro', '5', '2', '2', 'O colaborador já gozou os 22 dias de férias');
 INSERT INTO `tickets`.`tickets` (`title`, `description`, `created_by`, `updated_by`, `id_state`) VALUES ('Problema na integração com redes sociais', 'A integração com o Facebook não está funcionando corretamente', '2', '4', '1');
 
+ALTER TABLE `tickets`.`tickets` 
+ADD INDEX `fk_department_idx` (`id_department` ASC) VISIBLE;
+;
+ALTER TABLE `tickets`.`tickets` 
+ADD CONSTRAINT `fk_department`
+  FOREIGN KEY (`id_department`)
+  REFERENCES `tickets`.`departments` (`id`)
+  ON DELETE RESTRICT
+  ON UPDATE RESTRICT;
+
+
+ALTER TABLE `tickets`.`tickets` 
+DROP FOREIGN KEY `fk_department`;
+ALTER TABLE `tickets`.`tickets` 
+CHANGE COLUMN `id_department` `id_department` INT NOT NULL DEFAULT '1' ;
+ALTER TABLE `tickets`.`tickets` 
+ADD CONSTRAINT `fk_department`
+  FOREIGN KEY (`id_department`)
+  REFERENCES `tickets`.`departments` (`id`)
+  ON DELETE RESTRICT
+  ON UPDATE RESTRICT;
+
+
+ALTER TABLE `tickets`.`tickets` 
+ADD INDEX `fk_createdBy_idx` (`created_by` ASC) VISIBLE;
+;
+ALTER TABLE `tickets`.`tickets` 
+ADD CONSTRAINT `fk_createdBy`
+  FOREIGN KEY (`created_by`)
+  REFERENCES `tickets`.`users` (`id`)
+  ON DELETE RESTRICT
+  ON UPDATE RESTRICT;
+
+
+ALTER TABLE `tickets`.`tickets` 
+ADD INDEX `fk_updatedBy_idx` (`updated_by` ASC) VISIBLE;
+;
+ALTER TABLE `tickets`.`tickets` 
+ADD CONSTRAINT `fk_updatedBy`
+  FOREIGN KEY (`updated_by`)
+  REFERENCES `tickets`.`users` (`id`)
+  ON DELETE RESTRICT
+  ON UPDATE RESTRICT;
+
+
+
 
 
 

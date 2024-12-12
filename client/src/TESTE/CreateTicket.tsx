@@ -1,4 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import {useNavigate } from 'react-router-dom';
+
+interface Department {
+  id: number;
+  title: string;
+}
 
 const CreateTicket = () => {
   const [ticketData, setTicketData] = useState({
@@ -7,15 +13,28 @@ const CreateTicket = () => {
     department: ''
   });
 
-  const [error, setError] = useState(''); // Para armazenar erros de validação
+  const navigate = useNavigate();
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [error, setError] = useState('');
 
-  const departments = [
-    { id: 1, name: 'IT' },
-    { id: 2, name: 'Recursos Humanos' },
-    { id: 3, name: 'Marketing' },
-    { id: 4, name: 'Contabilidade' },
-    { id: 5, name: 'Vendas' }
-  ];
+  // Carregar os departamentos ao montar o componente
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      try {
+        const response = await fetch('/api/api/departments');
+        if (!response.ok) {
+          throw new Error('Falha ao carregar os departamentos');
+        }
+        const data = await response.json();
+        
+        setDepartments(data);
+      } catch (error) {
+        setError(`Erro: ${error.message}`);
+      }
+    };
+
+    fetchDepartments();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,24 +47,20 @@ const CreateTicket = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validação
     if (!ticketData.title || !ticketData.description || !ticketData.department) {
       setError('Por favor, preencha todos os campos.');
-      return; // Impede o envio do formulário
+      return;
     }
 
-    // Limpa o erro se os campos forem válidos
     setError('');
 
     try {
-
-    const body = {
+      const body = {
         title: ticketData.title,
         description: ticketData.description,
         created_by: 1,
-        id_department:2
-        };
-      // Envia os dados para a API via POST
+        id_department: ticketData.department,
+      };
       const response = await fetch('/api/api/tickets', {
         method: 'POST',
         headers: {
@@ -54,25 +69,25 @@ const CreateTicket = () => {
         body: JSON.stringify(body)
       });
 
-      // Verifica se a resposta foi bem-sucedida
       if (!response.ok) {
         throw new Error('Falha ao criar o ticket');
       }
 
       const data = await response.json();
-      console.log('Ticket criado com sucesso:', data);
-      
-      // Você pode fazer algo como limpar o formulário ou redirecionar o usuário após o sucesso
-      setTicketData({ title: '', description: '', department: '' });
+
+      navigate(`/detailsticket`, {
+        state: { "ticket":data },
+      });
     } catch (error) {
       setError(`Erro: ${error.message}`);
     }
   };
+
   return (
     <div className="create-ticket">
       <h2>Criar Ticket</h2>
       <form onSubmit={handleSubmit}>
-        {error && <p style={{ color: 'red' }}>{error}</p>} {/* Exibe a mensagem de erro */}
+        {error && <p style={{ color: 'red' }}>{error}</p>}
 
         <div>
           <label htmlFor="title">Título:</label>
@@ -107,11 +122,15 @@ const CreateTicket = () => {
             required
           >
             <option value="">Selecione o departamento</option>
-            {departments.map((dept) => (
-              <option key={dept.id} value={dept.id}>
-                {dept.name}
-              </option>
-            ))}
+            {departments.length > 0 ? (
+              departments.map((dept) => (
+                <option key={dept.id} value={dept.id}>
+                  {dept.title}
+                </option>
+              ))
+            ) : (
+              <option>Carregando...</option>
+            )}
           </select>
         </div>
 
