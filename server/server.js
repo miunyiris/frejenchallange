@@ -5,10 +5,13 @@ const User = require('./models/User');
 const Tickets = require('./models/Tickets');
 const { Op } = require('sequelize');
 const Department = require('./models/Departments');
+const cors = require('cors');
 
 app.use(express.json());
 
 app.use(express.urlencoded({ extended: true }));
+
+app.use(cors());
 
 function formatDate(date) {
     return `${date.getDate().toString().padStart(2, '0')}-${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getFullYear()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
@@ -25,6 +28,7 @@ function formatTicket(newTicket) {
         observacoes: newTicket.observacoes,
         createdByName: newTicket.createdBy.name,
         updatedByName: newTicket.updatedBy.name,
+        observations: newTicket.observacoes
     };
 }
 
@@ -66,7 +70,9 @@ app.post('/api/authenticate', async (req, res) => {
 
 app.put('/api/users/:id', async (req, res) => {
     const { id } = req.params;
-    const { username, email, password, id_department} = req.body;
+    const { name, password, id_department } = req.body;
+
+    console.log(req.body);
 
     try {
         const user = await User.findByPk(id);
@@ -75,14 +81,20 @@ app.put('/api/users/:id', async (req, res) => {
             return res.status(404).json({ error: 'User not found!' });
         }
 
-        await user.update({
-            name: username,
-            email: email,
-            password: password,
-            id_department: id_department
-        });
+        const updatedFields = {
+            name: name,
+            id_department: id_department,
+        };
 
-        res.status(200).json({ message: 'Usuário atualizado com sucesso!', userId: user.id });
+        if (password && password.trim() !== '') {
+            updatedFields.password = password;
+        }
+
+        await user.update(updatedFields);
+
+        const newUserInfo = await User.findByPk(id);
+
+        res.status(200).json(newUserInfo);
     } catch (error) {
         console.error('Erro ao atualizar usuário:', error);
         res.status(500).json({ error: 'Erro ao atualizar usuário', details: error.message });
