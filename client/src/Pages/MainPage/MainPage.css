@@ -1,0 +1,171 @@
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f9;
+}
+
+.homepage {
+  padding: 2rem;
+  width: 100%;
+}
+
+h1 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #333;
+}
+
+.ticket-table-container {
+  max-height: 400px;
+  overflow-y: auto; 
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 5px;
+  background-color: #fff;
+  width: 1500px;
+}
+
+.ticket-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.ticket-table th,
+.ticket-table td {
+  text-align: left;
+  padding: 1rem;
+  border-bottom: 1px solid #ddd;
+  text-align: center;
+}
+
+.ticket-table th {
+  background-color: #0077cc;
+  color: #fff;
+  font-weight: bold;
+}
+
+.ticket-table tr:hover {
+  background-color: #f1f1f1;
+}
+
+.status {
+  font-weight: bold;
+  padding: 0.5rem 0.8rem;
+  text-align: center !important;
+  border-radius: 5px;
+  display: inline-block;
+  width: 75%;
+  color: #fff;
+  background-color: #ffa726;
+}
+
+.status.Pendente {
+  color: #fff;
+  background-color: #f17a09ad;
+}
+
+.status.Recusado {
+  color: #fff;
+  background-color: #ff6f61;
+}
+
+.status.Finalizado {
+  color: #fff;
+  background-color: #66bb6a;
+}
+
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.clickable-row:hover {
+  background-color: #f1f1f1;
+}
+
+.filter-container {
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.state-filter-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 40px;
+  position: relative;
+}
+
+.filter-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  position: absolute;
+  left: 50px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.checkbox-state {
+  cursor: pointer;
+}
+
+.filter-search {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  position: absolute;
+  right: 150px;
+}
+
+.label-search {
+  margin-bottom: 10px;
+  width: 100%;
+  margin-right: 340px;
+}
+
+.label-search input {
+  width: 300px;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.search-button {
+  width: fit-content;
+  padding: 8px 12px;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.search-button:hover {
+  background-color: #005fa3;
+}
+
+button {
+  padding: 0.5rem 1rem;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #005fa3;
+}

@@ -1,3 +1,5 @@
+import './NewTicketPage.css';
+import Menu from '../Menu/Menu.tsx'
 import React, { useState, useEffect } from 'react';
 import {useNavigate } from 'react-router-dom';
 
@@ -13,15 +15,17 @@ const CreateTicket = () => {
     department: ''
   });
 
+  const department = localStorage.getItem('department');
+  const name = localStorage.getItem('name');
+
   const navigate = useNavigate();
   const [departments, setDepartments] = useState<Department[]>([]);
   const [error, setError] = useState('');
 
-  // Carregar os departamentos ao montar o componente
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        const response = await fetch('/api/api/departments');
+        const response = await fetch('http://localhost:1880/api/departments');
         if (!response.ok) {
           throw new Error('Falha ao carregar os departamentos');
         }
@@ -61,7 +65,7 @@ const CreateTicket = () => {
         created_by: 1,
         id_department: ticketData.department,
       };
-      const response = await fetch('/api/api/tickets', {
+      const response = await fetch('http://localhost:1880/api/tickets', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -83,37 +87,44 @@ const CreateTicket = () => {
     }
   };
 
-  return (
-    <div className="create-ticket">
-      <h2>Criar Ticket</h2>
-      <form onSubmit={handleSubmit}>
-        {error && <p style={{ color: 'red' }}>{error}</p>}
 
-        <div>
-          <label htmlFor="title">Título:</label>
+  return (
+    <>
+    <div className="menu">
+    <Menu userName={name} department={department} />
+    </div>
+    <div className="form-container">
+      <h1>Criar Novo Ticket</h1>
+      <form onSubmit={handleSubmit}>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+        <div className="form-group">
+          <label htmlFor="title">Título</label>
           <input
             type="text"
             id="title"
             name="title"
             value={ticketData.title}
             onChange={handleChange}
+            placeholder="Digite o título do ticket"
             required
           />
         </div>
 
-        <div>
-          <label htmlFor="description">Descrição:</label>
+        <div className="form-group">
+          <label htmlFor="description">Descrição</label>
           <textarea
             id="description"
             name="description"
             value={ticketData.description}
             onChange={handleChange}
+            placeholder="Descreva o problema ou solicitação"
+            rows={4}
             required
-          />
+          ></textarea>
         </div>
 
-        <div>
-          <label htmlFor="department">Departamento Responsável:</label>
+        <div className="form-group">
+          <label htmlFor="department">Departamento</label>
           <select
             id="department"
             name="department"
@@ -134,9 +145,15 @@ const CreateTicket = () => {
           </select>
         </div>
 
-        <button type="submit">Criar Ticket</button>
+        <button type="submit" className="back-button">
+         Voltar 
+        </button>
+        <button type="submit" className="submit-button">
+          Criar Ticket
+        </button>
       </form>
     </div>
+    </>
   );
 };
 

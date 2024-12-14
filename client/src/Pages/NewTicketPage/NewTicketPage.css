@@ -1,0 +1,87 @@
+/* CreateTicket.css */
+
+body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f9;
+}
+
+.form-container {
+  width: 600px;
+  margin: 2rem auto;
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.form-container h1 {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 1rem;
+  color: #555;
+  margin-bottom: 0.5rem;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 0.8rem;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-sizing: border-box;
+  outline: none;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  border-color: #0077cc;
+  box-shadow: 0 0 4px rgba(0, 119, 204, 0.3);
+}
+
+.submit-button {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  background-color: #0077cc;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+  margin-top: 10px;
+}
+
+.submit-button:hover {
+  background-color: #005fa3;
+}
+
+.back-button:hover {
+  background-color: #005fa3;
+}
+
+.back-button {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  background-color: #0077cc;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s;
+}

@@ -72,27 +72,29 @@ app.put('/api/users/:id', async (req, res) => {
     const { id } = req.params;
     const { name, password, id_department } = req.body;
 
-    console.log(req.body);
-
     try {
-        const user = await User.findByPk(id);
+        const user = await User.findByPk(id, {
+            attributes: ['id', 'name', 'password', 'id_department'],
+        });
 
         if (!user) {
             return res.status(404).json({ error: 'User not found!' });
         }
 
         const updatedFields = {
-            name: name,
-            id_department: id_department,
+            name,
+            id_department,
         };
 
         if (password && password.trim() !== '') {
             updatedFields.password = password;
         }
 
-        await user.update(updatedFields);
+        await user.update(updatedFields, { silent: true });
 
-        const newUserInfo = await User.findByPk(id);
+        const newUserInfo = await User.findByPk(id, {
+            attributes: ['id', 'name', 'email', 'id_department', 'admin'],
+        });
 
         res.status(200).json(newUserInfo);
     } catch (error) {
@@ -106,6 +108,8 @@ app.get('/api/tickets', async (req, res) => {
     const pageNumber =  Number(pagenumber);
     const pageSize = Number(pagesize);
     let hasMore= true;
+
+    console.log(req.query);
 
     let whereConditions = {};
 

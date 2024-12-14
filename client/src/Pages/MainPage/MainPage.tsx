@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import './MainTicket.css';
-import { useNavigate } from 'react-router-dom';
-import { FaEye, FaEdit } from 'react-icons/fa';
+import { useNavigate,useLocation } from 'react-router-dom';
+import './MainPage.css';
+import Menu from '../Menu/Menu.tsx';
 
 interface Ticket {
   id: number;
@@ -9,11 +9,13 @@ interface Ticket {
   description: string;
   department: string;
   id_state: number;
+  state:string;
   createdAt: string;
-  updateAt: string;
+  updatedAt: string;
   observacoes: string;
   createdByName: string;
   updatedByName: string;
+  observations:string;
 }
 
 const TicketList = () => {
@@ -39,6 +41,13 @@ const TicketList = () => {
   const departmentId = localStorage.getItem('id_department') !== null ? Number(localStorage.getItem('id_department')) : null;
   const department = localStorage.getItem('department');
   const name = localStorage.getItem('name');
+
+  const statusNames = {
+    1: "Pendente",
+    2: "Recusado",
+    3: "Em Tratamento",
+    4: "Finalizado",
+  };
 
   const fetchTickets = async (isSearch: boolean = false) => {
     setIsLoading(true);
@@ -70,7 +79,9 @@ const TicketList = () => {
         }
       }
     
-      const response = await fetch(`/api/api/tickets?${params.toString()}`);
+      const response = await fetch(`http://localhost:1880/api/tickets?${params.toString()}`);
+
+      console.log(response);
 
       if (response.status === 404) {
         setTickets([]);
@@ -148,57 +159,94 @@ const TicketList = () => {
   };
 
   return (
-    <div className="main-ticket-container">
-      <h1>Lista de Tickets</h1>
-
-      <div className="state-filter-container">
-        {['Pendente', 'Recusado', 'EmTratamento', 'Finalizado'].map((state) => (
-          <label key={state}>
-            <input
-              type="checkbox"
-              checked={filters[state]}
-              onChange={() => handleFilterChange(state)}
-            />
-            {state}
-          </label>
-        ))}
-        <label>
-          <input
-            type="text"
-            placeholder="Pesquisar por título, descrição ou observações"
-            value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
-          />
-        </label>
-        <button onClick={handleSearchClick}>Pesquisar</button>
+    <>
+      <div className="menu">
+        <Menu userName={name} department={department} />
       </div>
-
-
-      <div className="ticket-list">
+      <div className="homepage">
         <h1>Lista de Tickets</h1>
-        <ul>
-          {tickets.map((ticket) => (
-            <li key={ticket.id} className="ticket-item">
-              <span>{ticket.title}</span>
 
-            {(ticket.id_state === 1 || ticket.id_state === 3 || admin === 1) && (
-              <button onClick={() => handleEditTicket(ticket)} title="Editar">
-                <FaEdit />
-              </button>
-            )}
+        <div className="state-filter-container">
+  <div className="filter-checkboxes">
+    {['Pendente', 'Recusado', 'EmTratamento', 'Finalizado'].map((state) => (
+      <label key={state} className="checkbox-label">
+        <input
+          className="checkbox-state"
+          type="checkbox"
+          checked={filters[state]}
+          onChange={() => handleFilterChange(state)}
+        />
+        {state}
+      </label>
+    ))}
+  </div>
 
-              <button onClick={() => handleViewDetails(ticket)} title="Ver Detalhes">
-                <FaEye />
-              </button>
-            </li>
-          ))}
-        </ul>
-        <div ref={loader} style={{ height: '20px' }} />
+  <div className="filter-search">
+    <label className="label-search">
+      <input
+        type="text"
+        placeholder="Pesquisar por título, descrição ou observações"
+        value={search}
+        onChange={(e) => handleSearchChange(e.target.value)}
+      />
+    </label>
+    <button onClick={handleSearchClick} className="search-button">Pesquisar</button>
+  </div>
+</div>
+
+        <div className="ticket-table-container">
+          <table className="ticket-table">
+            <thead>
+              <tr>
+                <th>Título</th>
+                <th>Data de Criação</th>
+                <th>Última Atualização</th>
+                <th>Departamento</th>
+                <th>Status</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {tickets.map((ticket) => (
+                <tr key={ticket.id} className="clickable-row">
+                  <td onClick={() => handleViewDetails(ticket)}>{ticket.title}</td>
+                  <td onClick={() => handleViewDetails(ticket)}>{ticket.createdAt}</td>
+                  <td onClick={() => handleViewDetails(ticket)}>{ticket.updatedAt}</td>
+                  <td onClick={() => handleViewDetails(ticket)}>{ticket.department}</td>
+                  <td
+                    onClick={() => handleViewDetails(ticket)}
+                    className={`status ${statusNames[ticket.id_state]}`}
+                  >
+                    {statusNames[ticket.id_state] || "Status desconhecido"}
+                  </td>
+                  {(ticket.id_state === 1 || ticket.id_state === 3 || admin === 1) && (
+                    <td>
+                      <button
+                        className="edit-button"
+                        // onClick={(e) => {
+                        //   e.stopPropagation();
+                        //   handleEditTicket(ticket);
+                        // }}
+                        onClick={() => handleEditTicket(ticket)}
+                      >
+                        Editar
+                      </button>
+                    </td>
+                  )}
+                </tr>
+              ))}
+              {hasMore && (
+                <tr ref={loader}>
+                  <td colSpan={6} style={{ height: '20px', textAlign: 'center' }}>
+                    Carregando...
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
-
-      {isLoading && <p>Carregando...</p>}
-      {!hasMore && <p>Todos os tickets foram carregados.</p>}
-    </div>
+    </>
   );
 };
 

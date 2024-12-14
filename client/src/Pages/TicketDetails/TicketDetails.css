@@ -1,0 +1,86 @@
+.details-container {
+  max-width: 600px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.details-header {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.details-header h1 {
+  margin: 0;
+  font-size: 24px;
+  color: #333;
+}
+
+.details-content {
+  margin-bottom: 20px;
+  
+}
+
+.details-item {
+  margin-bottom: 10px;
+  margin-left: 100px;
+}
+
+.details-item strong {
+  display: inline-block;
+  width: 150px;
+  font-weight: bold;
+}
+
+.status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #fff;
+  width:550px;
+  margin-top: 15px;
+}
+
+.status.Pendente {
+  color: #fff;
+  background-color: #f17a09ad;
+}
+
+.status.Recusado {
+  color: #fff;
+  background-color: #ff6f61;
+}
+
+.status.Finalizado {
+  color: #fff;
+  background-color: #66bb6a;
+}
+
+.details-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.back-button,
+.edit-button {
+  display: inline-block;
+  padding: 10px 15px;
+  text-decoration: none;
+  color: #fff;
+  border-radius: 4px;
+  background-color: #0077cc;
+  transition: background-color 0.3s;
+}
+
+.back-button:hover {
+  background-color: #005fa3;
+}
+
+.edit-button {
+  background-color: #28a745;
+}
+
+.edit-button:hover {
+  background-color: #218838;
+}

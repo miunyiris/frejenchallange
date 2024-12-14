@@ -1,0 +1,65 @@
+/* Menu.css */
+
+.menu {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #0077cc;
+  color: #fff;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position:absolute;
+  top: 0;
+  right: 0;
+  left:0;
+}
+
+.menu-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.menu-link {
+  text-decoration: none;
+  font-size: 1rem;
+  color: #fff;
+  transition: color 0.3s;
+}
+
+.menu-link:hover {
+  color: #cce4ff;
+}
+
+.menu-logout {
+  background-color: #ff4d4d;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.menu-logout:hover {
+  background-color: #cc0000;
+}
+
+.welcome-container {
+  display: flex;
+  flex-direction: column;
+  margin-top: 10px;
+}
+
+.welcome-name {
+  font-weight: bold;
+}
+
+.welcome-department {
+  color: white;
+}
+.menu-right {
+  display: flex;
+  align-items: center;
+  gap: 20px; /* Adjust spacing between welcome-container and logout button */
+}
