@@ -29,7 +29,6 @@ const TicketDetails: React.FC = () => {
     <div className="details-container">
       <div className="details-header">
         <h1>Detalhes do Ticket</h1>
-        <p>ID: {ticket.id}</p>
       </div>
       <div className="details-content">
         <div className="details-item">

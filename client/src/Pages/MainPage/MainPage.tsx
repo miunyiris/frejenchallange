@@ -81,7 +81,7 @@ const TicketList = () => {
     
       const response = await fetch(`http://localhost:1880/api/tickets?${params.toString()}`);
 
-      console.log(response);
+
 
       if (response.status === 404) {
         setTickets([]);

@@ -59,15 +59,13 @@
   margin-top: 15px;
 }
 
-/* Center the buttons in the container */
 .button-container {
   display: flex;
   justify-content: center;
-  gap: 15px; /* Adds spacing between the buttons */
+  gap: 15px;
   margin-top: 20px;
 }
 
-/* Shared button styles */
 .action-button {
   display: inline-block;
   padding: 10px 15px;
@@ -78,7 +76,7 @@
   cursor: pointer;
   text-align: center;
   transition: background-color 0.3s;
-  text-decoration: none; /* Ensures the link button looks like a button */
+  text-decoration: none;
 }
 
 .action-button:hover {

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './LoginPage.css'; // Custom CSS for unique styles
+import './LoginPage.css';
 import { useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {

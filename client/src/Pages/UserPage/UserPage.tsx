@@ -16,8 +16,8 @@ const UserPage: React.FC = () => {
     department: localStorage.getItem('id_department') !== null ? Number(localStorage.getItem('id_department')) : null
   });
 
-  const department = localStorage.getItem('department');
-  const name = localStorage.getItem('name');
+  let department = localStorage.getItem('department');
+  let name = localStorage.getItem('name');
 
   const [departments, setDepartments] = useState<Department[]>([]);
 
@@ -74,6 +74,9 @@ const UserPage: React.FC = () => {
       localStorage.setItem('name', userData.name);
       localStorage.setItem('id_department', userData.department);
       localStorage.setItem('department', departments.find(dep => dep.id === userData.department)?.title || '');
+      department = localStorage.getItem('department');
+      name = localStorage.getItem('name');
+      window.location.reload();
     } catch (error) {
     }
   };

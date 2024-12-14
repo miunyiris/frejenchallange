@@ -56,8 +56,8 @@ const EditableTicketDetails: React.FC = () => {
       const stateId = stateToId[updatedState] || 1;
 
       const updatedTicket = {
-        idState: stateId,
-        observacoes: updatedObservations,
+        idState: stateId +1,
+        observations: updatedObservations,
         userId:1
       };
 

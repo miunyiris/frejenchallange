@@ -22,6 +22,7 @@ function formatTicket(newTicket) {
         id: newTicket.id,
         title: newTicket.title,
         department: newTicket.Department.title,
+        description: newTicket.description,
         id_state: newTicket.id_state,
         createdAt: formatDate(new Date(newTicket.createdAt)),
         updatedAt: formatDate(new Date(newTicket.updatedAt)),
@@ -108,8 +109,6 @@ app.get('/api/tickets', async (req, res) => {
     const pageNumber =  Number(pagenumber);
     const pageSize = Number(pagesize);
     let hasMore= true;
-
-    console.log(req.query);
 
     let whereConditions = {};
 
@@ -217,11 +216,12 @@ if (andConditions.length > 0) {
             return {
                 id:ticket.id,
                 title:ticket.title,
+                description:ticket.description,
                 department:ticket.Department.title,
                 id_state:ticket.id_state,
                 createdAt: formatDate(new Date(ticket.createdAt)),
                 updatedAt:formatDate(new Date(ticket.updatedAt)),
-                observacoes:ticket.observacoes,
+                observations:ticket.observacoes,
                 createdByName:ticket.createdBy.name,
                 updatedByName:ticket.updatedBy.name,
             };

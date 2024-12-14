@@ -3,15 +3,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import './Menu.css';
 
 interface MenuProps {
-  userName: string; // Pass the user's name as a prop
-  department: string; // Pass the user's department as a prop
+  userName: string; 
+  department: string; 
 }
 
 const Menu: React.FC<MenuProps> = ({ userName, department }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
-    // Simulate logout logic (e.g., clear tokens, redirect to login page)
     localStorage.clear();
     navigate('/');
   };
